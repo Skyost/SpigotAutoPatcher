@@ -14,6 +14,19 @@ import net.md_5.jbeat.Patcher;
 
 public class Utils {
 
+	/**
+	 * Patchs a file.
+	 * 
+	 * @param originalFile The original file.
+	 * @param patchFile The patch file.
+	 * @param outputFile The destination.
+	 * 
+	 * @return <b>true</b> : success.
+	 * <b>false</b> : otherwise.
+	 * 
+	 * @author md_5.
+	 */
+	
 	public static final boolean patch(final File originalFile, final File patchFile, final File outputFile) {
 		if(!originalFile.canRead()) {
 			System.out.println("Specified original file " + originalFile + " does not exist or cannot be read !");
@@ -39,35 +52,47 @@ public class Utils {
 		System.out.println("\tOutput md5 Checksum: " + getMD5(outputFile));
 		return true;
 	}
+	
+	/**
+	 * Gets the MD5 hash of a file.
+	 * 
+	 * @param file The file.
+	 * 
+	 * @return The MD5 hash.
+	 */
 
-	private static String getMD5(final File file) {
-		try(FileInputStream inputStream = new FileInputStream(file)) {
+	private static final String getMD5(final File file) {
+		try {
+			final FileInputStream inputStream = new FileInputStream(file);
 			final MessageDigest digest = MessageDigest.getInstance("MD5");
-
 			final byte[] bytesBuffer = new byte[1024];
 			int bytesRead = -1;
-
 			while((bytesRead = inputStream.read(bytesBuffer)) != -1) {
 				digest.update(bytesBuffer, 0, bytesRead);
 			}
-
-			final byte[] hashedBytes = digest.digest();
-
-			return convertByteArrayToHexString(hashedBytes);
+			inputStream.close();
+			final StringBuilder builder = new StringBuilder();
+			for(final byte arrayByte : digest.digest()) {
+				builder.append(Integer.toString((arrayByte & 0xff) + 0x100, 16).substring(1));
+			}
+			return builder.toString();
 		}
 		catch(final Exception ex) {
 			ex.printStackTrace();
 		}
 		return null;
 	}
-
-	private static String convertByteArrayToHexString(final byte[] arrayBytes) {
-		final StringBuilder builder = new StringBuilder();
-		for(final byte arrayByte : arrayBytes) {
-			builder.append(Integer.toString((arrayByte & 0xff) + 0x100, 16).substring(1));
-		}
-		return builder.toString();
-	}
+	
+	/**
+	 * Downloads a file.
+	 * 
+	 * @param site The file's url.
+	 * @param dest The file's destination.
+	 * @param progressBar Used to report the progress.
+	 * 
+	 * @return <b>true</b> : success.
+	 * <b>false</b> : otherwise.
+	 */
 
 	public static final boolean download(final String site, final File dest, final JProgressBar progressBar) {
 		try {
@@ -101,6 +126,12 @@ public class Utils {
 		}
 		return false;
 	}
+	
+	/**
+	 * Cleans a directory.
+	 * 
+	 * @param dir The directory.
+	 */
 	
 	public static final void cleanDir(final File dir) {
 		for(final File file : dir.listFiles()) {
